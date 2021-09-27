@@ -5,6 +5,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.cardview.widget.CardView;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import android.Manifest;
 import android.content.Context;
@@ -20,8 +22,10 @@ import android.util.TypedValue;
 import android.view.View;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
+import com.android.volley.Request;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -50,6 +54,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private TextView userAddress;
     private TextView userAddressLabel;
     private Marker marker;
+    private RecyclerView recycler;
 
 
     // Constants
@@ -78,16 +83,21 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         behavior = BottomSheetBehavior.from(movableSheet);
         userAddress = findViewById(R.id.userAddress);
         userAddressLabel = findViewById(R.id.userAddressLabel);
+        recycler = findViewById(R.id.recycler);
+
+        //Recycler
+        recycler.setLayoutManager(new LinearLayoutManager(this));
+        recycler.setAdapter(new DayWeatherAdapter(this));
 
 
+        // On Bottom Sheet View Expand
         behavior.addBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
             @Override
             public void onStateChanged(@NonNull View bottomSheet, int newState) {
                 if (newState == BottomSheetBehavior.STATE_EXPANDED) {
-                    movableSheet.setRadius(0);
+                    mMap.setPadding(0, 0, 0, headerLayout.getHeight() + recycler.getHeight());
                 } else {
-                    float radius = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 16f, getResources().getDisplayMetrics());
-                    movableSheet.setRadius(radius);
+                    mMap.setPadding(0, 0, 0, headerLayout.getHeight());
                 }
             }
 
@@ -96,7 +106,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
             }
         });
-
     }
 
     @Override
@@ -114,7 +123,10 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             mMap.setPadding(0, 0, 0, headerLayout.getHeight());
 
             // Peek Height
-            behavior.setPeekHeight(headerLayout.getHeight());
+            float dp16 = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 16f, getResources().getDisplayMetrics());
+            //ABOVE: 16DP height , to assist with hiding bottom radius on card view
+
+            behavior.setPeekHeight((int) (headerLayout.getHeight()+dp16));
         });
     }
 
@@ -126,7 +138,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                     new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
                     LOCATION_PERMISSION_REQUEST_CODE);
         }else{
-            getLocation(false);
+            getMyLocation(false);
         }
     }
 
@@ -135,14 +147,14 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if( requestCode == LOCATION_PERMISSION_REQUEST_CODE){
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                getLocation(true);
+                getMyLocation(true);
             }else{
                 Log.w(TAG, "Location denied!");
             }
         }
     }
 
-    private void getLocation(boolean animate){
+    private void getMyLocation(boolean animate){
         if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION)
                 == PackageManager.PERMISSION_GRANTED) {
 
@@ -155,7 +167,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                             if(!mMap.isMyLocationEnabled())
                                 mMap.setMyLocationEnabled(true);
 
-                            getUserAddress(location.getLatitude(), location.getLongitude());
+                            getAddressInfo(location.getLatitude(), location.getLongitude());
 
                             if(animate)
                                 mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(location.getLatitude(), location.getLongitude()), ZOOM_2));
@@ -166,7 +178,15 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
     }
 
-    private void getUserAddress(double userLat, double userLon){
+    private void getAddressInfo(double userLat, double userLon){
+
+        getGeoInfo(userLat, userLon);
+        getWeatherInfo(userLat, userLon);
+
+    }
+
+    private void getGeoInfo(double userLat, double userLon){
+
         Geocoder geocoder = new Geocoder(this, Locale.getDefault());
         try {
             List<Address> addresses = geocoder.getFromLocation(userLat, userLon, 1);
@@ -194,6 +214,18 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
     }
 
+    private void getWeatherInfo(double userLat, double userLon){
+        WeatherYdnRequestManager requestManager = WeatherYdnRequestManager.getInstance(this);
+        WeatherYdnRequest request = new WeatherYdnRequest(Request.Method.GET, "https://www.4-sure.net/", null,
+                response -> {
+                    // Add success logic here
+                    Log.d(TAG, "getWeatherInfo-response: "+response.toString());
+                }, error -> {
+                    Log.d(TAG, "getWeatherInfo-error: "+error.getLocalizedMessage());
+                });
+        requestManager.addToRequestQueue(request);
+    }
+
     protected BitmapDescriptor bitmapDescriptorFromVector(Context context, int vectorResId) {
         Drawable vectorDrawable = ContextCompat.getDrawable(context, vectorResId);
         vectorDrawable.setBounds(0, 0, vectorDrawable.getIntrinsicWidth(), vectorDrawable.getIntrinsicHeight());
@@ -219,7 +251,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             marker.remove();
         }
 
-        getUserAddress(latLng.latitude, latLng.longitude);
+        getAddressInfo(latLng.latitude, latLng.longitude);
         addMarker(latLng);
     }
 
@@ -228,7 +260,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         if(marker != null){
             marker.remove();
             userAddressLabel.setText("Current Location");
-            getLocation(true);
+            getMyLocation(true);
             return false;
         }
 
