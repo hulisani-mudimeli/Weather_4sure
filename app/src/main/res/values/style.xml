@@ -1,4 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
 
+    <style name="AppTheme.NoActionBar" parent="Theme.MaterialComponents.Light.NoActionBar">
+        <item name="android:statusBarColor">@color/white</item>
+        <item name="android:windowLightStatusBar" tools:targetApi="m">true</item>
+    </style>
+
+    <style name="TextInputStyle1" parent="Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+        <item name="boxBackgroundColor">@color/input_field_background_1</item>
+        <item name="boxStrokeColor">@color/input_field_background_1</item>
+        <item name="strokeColor">@color/input_field_background_1</item>
+        <item name="boxCornerRadiusBottomEnd">@dimen/default_radius</item>
+        <item name="boxCornerRadiusBottomStart">@dimen/default_radius</item>
+        <item name="boxCornerRadiusTopEnd">@dimen/default_radius</item>
+        <item name="boxCornerRadiusTopStart">@dimen/default_radius</item>
+        <item name="hintEnabled">false</item>
+        <item name="android:layout_marginStart">@dimen/button_margin</item>
+        <item name="android:layout_marginEnd">@dimen/button_margin</item>
+        <item name="android:layout_marginTop">@dimen/button_margin</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_width">match_parent</item>
+    </style>
 </resources>

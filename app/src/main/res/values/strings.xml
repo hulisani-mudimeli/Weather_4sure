@@ -1,3 +1,5 @@
 <resources>
-    <string name="app_name">Weather_4sure</string>
+    <string name="app_name">Weather 4sure</string>
+    <string name="map_key">AIzaSyDAF6EOhuFTq6NhSnXSPceuDqH2lwmT4k8</string>
+
 </resources>
