@@ -227,6 +227,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     public boolean onMyLocationButtonClick() {
         if(marker != null){
             marker.remove();
+            userAddressLabel.setText("Current Location");
             getLocation(true);
             return false;
         }
