@@ -26,30 +26,33 @@
             android:layout_width="0dp"
             android:layout_height="25dp"
             android:layout_weight="5"
-            android:src="@drawable/sun"/>
+            android:src="@drawable/ic_01d"/>
 
         <TextView
             android:id="@+id/hiTemp"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_weight="3"
             android:paddingStart="@dimen/card_spacing"
             android:paddingTop="@dimen/item_spacing"
             android:paddingBottom="@dimen/item_spacing"
             android:paddingEnd="@dimen/card_spacing"
-            android:layout_marginStart="@dimen/card_spacing"
+            android:gravity="center"
             android:layout_marginEnd="@dimen/item_spacing"
             android:textColor="@color/black"
             tools:text="29"/>
 
         <TextView
             android:id="@+id/loTemp"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_weight="3"
             android:paddingStart="@dimen/card_spacing"
             android:paddingTop="@dimen/item_spacing"
             android:paddingBottom="@dimen/item_spacing"
             android:paddingEnd="@dimen/card_spacing"
             android:layout_marginStart="@dimen/item_spacing"
+            android:gravity="center"
             android:layout_marginEnd="@dimen/card_spacing"
             tools:text="15"/>
 

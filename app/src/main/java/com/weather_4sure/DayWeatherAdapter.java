@@ -8,22 +8,20 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import org.json.JSONObject;
+
 import java.util.ArrayList;
+import java.util.Map;
 
 public class DayWeatherAdapter extends RecyclerView.Adapter<DayWeatherViewHolder>{
     private final Context context;
-    private final ArrayList<String> days;
+//    private final ArrayList<String> days;
+    private ArrayList<ArrayList<JSONObject>>  daysForecastedMap;
 
-    public DayWeatherAdapter(Context context){
+    public DayWeatherAdapter(Context context, ArrayList<ArrayList<JSONObject>>  daysForecastedMap){
         this.context = context;
+        this.daysForecastedMap = daysForecastedMap;
 
-        days = new ArrayList<>();
-        days.add("Tuesday");
-        days.add("Wednesday");
-        days.add("Thursday");
-        days.add("Friday");
-        days.add("Saturday");
-        days.add("Sunday");
     }
 
     @NonNull
@@ -36,12 +34,12 @@ public class DayWeatherAdapter extends RecyclerView.Adapter<DayWeatherViewHolder
 
     @Override
     public void onBindViewHolder(@NonNull DayWeatherViewHolder holder, int position) {
-        String day = days.get(position);
+        JSONObject day = daysForecastedMap.get(position).get(0);
         holder.bindView(day);
     }
 
     @Override
     public int getItemCount() {
-        return days.size();
+        return daysForecastedMap.size();
     }
 }

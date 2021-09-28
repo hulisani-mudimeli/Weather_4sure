@@ -23,9 +23,6 @@ import android.view.View;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import com.android.volley.Request;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -39,10 +36,15 @@ import com.google.android.gms.maps.model.MapStyleOptions;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
+import com.jakewharton.threetenabp.AndroidThreeTen;
+
+import org.json.JSONObject;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 public class MainActivity extends AppCompatActivity implements OnMapReadyCallback, GoogleMap.OnMapClickListener, GoogleMap.OnMyLocationButtonClickListener {
 
@@ -74,6 +76,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        AndroidThreeTen.init(this);
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.mapView);
         mapFragment.getMapAsync(this);
@@ -84,10 +87,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         userAddress = findViewById(R.id.userAddress);
         userAddressLabel = findViewById(R.id.userAddressLabel);
         recycler = findViewById(R.id.recycler);
-
-        //Recycler
-        recycler.setLayoutManager(new LinearLayoutManager(this));
-        recycler.setAdapter(new DayWeatherAdapter(this));
 
 
         // On Bottom Sheet View Expand
@@ -215,15 +214,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
     private void getWeatherInfo(double userLat, double userLon){
-        WeatherYdnRequestManager requestManager = WeatherYdnRequestManager.getInstance(this);
-        WeatherYdnRequest request = new WeatherYdnRequest(Request.Method.GET, "https://www.4-sure.net/", null,
-                response -> {
-                    // Add success logic here
-                    Log.d(TAG, "getWeatherInfo-response: "+response.toString());
-                }, error -> {
-                    Log.d(TAG, "getWeatherInfo-error: "+error.getLocalizedMessage());
-                });
-        requestManager.addToRequestQueue(request);
+        OpenWeatherAPI.getInstance(this).getForecast(new LatLng(userLat, userLon));
     }
 
     protected BitmapDescriptor bitmapDescriptorFromVector(Context context, int vectorResId) {
@@ -249,6 +240,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     public void onMapClick(@NonNull LatLng latLng) {
         if(marker != null){
             marker.remove();
+            marker = null;
         }
 
         getAddressInfo(latLng.latitude, latLng.longitude);
@@ -259,11 +251,21 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     public boolean onMyLocationButtonClick() {
         if(marker != null){
             marker.remove();
+            marker = null;
             userAddressLabel.setText("Current Location");
             getMyLocation(true);
-            return false;
+            return true;
         }
 
-        return true;
+        return false;
+    }
+
+    public void reloadRecycler(ArrayList<ArrayList<JSONObject>> daysForecastedMap){
+        //Recycler
+        recycler.setLayoutManager(new LinearLayoutManager(this));
+        recycler.setAdapter(new DayWeatherAdapter(this, daysForecastedMap));
+
+        behavior.setState(BottomSheetBehavior.STATE_EXPANDED);
+
     }
 }
