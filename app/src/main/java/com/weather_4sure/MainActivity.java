@@ -13,10 +13,15 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.location.Address;
 import android.location.Geocoder;
 import android.os.Bundle;
+import android.text.Spannable;
+import android.text.SpannableString;
+import android.text.style.ForegroundColorSpan;
+import android.text.style.StyleSpan;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.View;
@@ -55,6 +60,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private BottomSheetBehavior<CardView> behavior;
     private TextView userAddress;
     private TextView userAddressLabel;
+    private TextView degreeLabelView;
     private Marker marker;
     private RecyclerView recycler;
 
@@ -87,6 +93,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         userAddress = findViewById(R.id.userAddress);
         userAddressLabel = findViewById(R.id.userAddressLabel);
         recycler = findViewById(R.id.recycler);
+        degreeLabelView = findViewById(R.id.degreeLabelView);
+        setLabelCelsius(degreeLabelView);
 
 
         // On Bottom Sheet View Expand
@@ -95,14 +103,16 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             public void onStateChanged(@NonNull View bottomSheet, int newState) {
                 if (newState == BottomSheetBehavior.STATE_EXPANDED) {
                     mMap.setPadding(0, 0, 0, headerLayout.getHeight() + recycler.getHeight());
-                } else {
+                } else if (newState == BottomSheetBehavior.STATE_COLLAPSED){
                     mMap.setPadding(0, 0, 0, headerLayout.getHeight());
                 }
 
-                if(marker != null){
-                    mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(marker.getPosition(), ZOOM_2));
-                }else if(mMap.isMyLocationEnabled()){
-                    getMyLocation(true, false);
+                if(newState == BottomSheetBehavior.STATE_EXPANDED | newState == BottomSheetBehavior.STATE_COLLAPSED) {
+                    if (marker != null) {
+                        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(marker.getPosition(), ZOOM_2));
+                    } else if (mMap.isMyLocationEnabled()) {
+                        getMyLocation(true, false);
+                    }
                 }
             }
 
@@ -271,8 +281,53 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         //Recycler
         recycler.setLayoutManager(new LinearLayoutManager(this));
         recycler.setAdapter(new DayWeatherAdapter(this, daysForecastedMap));
+        setLabelCelsius(degreeLabelView);
 
-        behavior.setState(BottomSheetBehavior.STATE_EXPANDED);
-
+        if(behavior.getState() != BottomSheetBehavior.STATE_EXPANDED)
+            behavior.setState(BottomSheetBehavior.STATE_EXPANDED);
     }
+
+    public void degreeToggle(View view) {
+        DayWeatherAdapter adapter = (DayWeatherAdapter)recycler.getAdapter();
+        ArrayList<DayWeatherViewHolder> holders = adapter.getHolders();
+
+
+        if(adapter.isCelsius) {
+            for (DayWeatherViewHolder holder : holders) {
+                holder.hiTempView.setText(String.valueOf((int)DayWeatherViewHolder.getFahrenheit(holder.maxTempinKelvin)));
+                holder.loTempView.setText(String.valueOf((int)DayWeatherViewHolder.getFahrenheit(holder.minTempinKelvin)));
+            }
+            adapter.isCelsius = false;
+            setLabelFahrenheit(degreeLabelView);
+        }else{
+            for (DayWeatherViewHolder holder : holders) {
+                holder.loTempView.setText(String.valueOf((int)(holder.minTempinKelvin - DayWeatherViewHolder.KELVIN_CELSIUS)));
+                holder.hiTempView.setText(String.valueOf((int)(holder.maxTempinKelvin - DayWeatherViewHolder.KELVIN_CELSIUS)));
+            }
+            adapter.isCelsius = true;
+            setLabelCelsius(degreeLabelView);
+        }
+
+        if(behavior.getState() != BottomSheetBehavior.STATE_EXPANDED)
+            behavior.setState(BottomSheetBehavior.STATE_EXPANDED);
+    }
+
+    private void setLabelCelsius(TextView view){
+        Spannable spannable = new SpannableString(view.getText().toString());
+        spannable.setSpan(new StyleSpan(Typeface.BOLD), 0, 1, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+        spannable.setSpan(new ForegroundColorSpan(getResources().getColor(R.color.black)), 0, 1, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+        spannable.setSpan(new StyleSpan(Typeface.NORMAL), 1, 5, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+        spannable.setSpan(new ForegroundColorSpan(getResources().getColor(R.color.grey)), 1, 5, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+        view.setText(spannable);
+    }
+
+    private void setLabelFahrenheit(TextView view){
+        Spannable spannable = new SpannableString(view.getText().toString());
+        spannable.setSpan(new StyleSpan(Typeface.BOLD), 4, 5, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+        spannable.setSpan(new ForegroundColorSpan(getResources().getColor(R.color.black)), 4, 5, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+        spannable.setSpan(new StyleSpan(Typeface.NORMAL), 0, 4, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+        spannable.setSpan(new ForegroundColorSpan(getResources().getColor(R.color.grey)), 0, 4, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+        view.setText(spannable);
+    }
+
 }

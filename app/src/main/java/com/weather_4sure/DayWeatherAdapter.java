@@ -17,11 +17,13 @@ public class DayWeatherAdapter extends RecyclerView.Adapter<DayWeatherViewHolder
     private final Context context;
 //    private final ArrayList<String> days;
     private ArrayList<ArrayList<JSONObject>>  daysForecastedMap;
+    private ArrayList<DayWeatherViewHolder> holders;
+    public boolean isCelsius = true;
 
     public DayWeatherAdapter(Context context, ArrayList<ArrayList<JSONObject>>  daysForecastedMap){
         this.context = context;
         this.daysForecastedMap = daysForecastedMap;
-
+        holders = new ArrayList<>();
     }
 
     @NonNull
@@ -29,7 +31,10 @@ public class DayWeatherAdapter extends RecyclerView.Adapter<DayWeatherViewHolder
     public DayWeatherViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         LayoutInflater inflater = LayoutInflater.from(context);
         View view = inflater.inflate(R.layout.item_day_weather, parent, false);
-        return new DayWeatherViewHolder(view);
+
+        DayWeatherViewHolder holder = new DayWeatherViewHolder(view);
+        holders.add(holder);
+        return holder;
     }
 
     @Override
@@ -42,5 +47,9 @@ public class DayWeatherAdapter extends RecyclerView.Adapter<DayWeatherViewHolder
     @Override
     public int getItemCount() {
         return daysForecastedMap.size();
+    }
+
+    public ArrayList<DayWeatherViewHolder> getHolders() {
+        return holders;
     }
 }

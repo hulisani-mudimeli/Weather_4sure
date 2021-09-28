@@ -22,10 +22,15 @@ import org.threeten.bp.format.DateTimeFormatter;
 public class DayWeatherViewHolder extends RecyclerView.ViewHolder{
     private TextView dayView;
     private ShapeableImageView  weatherIcon;
-    private TextView hiTempView;
-    private TextView loTempView;
+    public TextView hiTempView;
+    public TextView loTempView;
+
+    public double minTempinKelvin;
+    public double maxTempinKelvin;
 
     private String TAG = "DayWeatherViewHolderTAG";
+
+    public static final double KELVIN_CELSIUS = 273.15;
 
     public DayWeatherViewHolder(@NonNull View itemView) {
         super(itemView);
@@ -42,8 +47,12 @@ public class DayWeatherViewHolder extends RecyclerView.ViewHolder{
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("EEEE");
             dayView.setText(ld.format(formatter));
 
-            loTempView.setText(String.format("%.0f", day.getJSONObject("main").getDouble("temp_min") - 273.15) + " ℃");
-            hiTempView.setText(String.format("%.0f", day.getJSONObject("main").getDouble("temp_max") - 273.15) + " ℃");
+            minTempinKelvin = day.getJSONObject("main").getDouble("temp_min");
+            maxTempinKelvin = day.getJSONObject("main").getDouble("temp_max");
+
+
+            loTempView.setText(String.valueOf((int)(minTempinKelvin - KELVIN_CELSIUS)));
+            hiTempView.setText(String.valueOf((int)(maxTempinKelvin - KELVIN_CELSIUS)));
 
 
             // Weather Icon
@@ -72,9 +81,9 @@ public class DayWeatherViewHolder extends RecyclerView.ViewHolder{
             e.printStackTrace();
             Log.e(TAG, "bindView: " + e.getMessage());
         }
+    }
 
-
-
-
+    public static double getFahrenheit(double kelvin){
+        return (kelvin - KELVIN_CELSIUS) * 9/5 +32;
     }
 }
