@@ -42,8 +42,8 @@ public class DayWeatherViewHolder extends RecyclerView.ViewHolder{
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("EEEE");
             dayView.setText(ld.format(formatter));
 
-            loTempView.setText(String.format("%.2f", day.getJSONObject("main").getDouble("temp_min") - 273.15));
-            hiTempView.setText(String.format("%.2f", day.getJSONObject("main").getDouble("temp_max") - 273.15));
+            loTempView.setText(String.format("%.0f", day.getJSONObject("main").getDouble("temp_min") - 273.15) + " ℃");
+            hiTempView.setText(String.format("%.0f", day.getJSONObject("main").getDouble("temp_max") - 273.15) + " ℃");
 
 
             // Weather Icon

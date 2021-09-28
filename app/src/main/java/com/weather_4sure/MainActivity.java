@@ -63,7 +63,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     public static final int LOCATION_PERMISSION_REQUEST_CODE = 1;
 
     private static final short DEFAULT_ZOOM = 12;
-    private static final short ZOOM_2 = 11;
+    private static final short ZOOM_2 = 9;
     private static final short ZOOM_3 = 6;
 
     public static final double DEFAULT_LATITUDE = -25.686357;
@@ -97,6 +97,12 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                     mMap.setPadding(0, 0, 0, headerLayout.getHeight() + recycler.getHeight());
                 } else {
                     mMap.setPadding(0, 0, 0, headerLayout.getHeight());
+                }
+
+                if(marker != null){
+                    mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(marker.getPosition(), ZOOM_2));
+                }else if(mMap.isMyLocationEnabled()){
+                    getMyLocation(true, false);
                 }
             }
 
@@ -137,7 +143,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                     new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
                     LOCATION_PERMISSION_REQUEST_CODE);
         }else{
-            getMyLocation(false);
+            getMyLocation(false, true);
         }
     }
 
@@ -146,14 +152,14 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if( requestCode == LOCATION_PERMISSION_REQUEST_CODE){
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                getMyLocation(true);
+                getMyLocation(true, true);
             }else{
                 Log.w(TAG, "Location denied!");
             }
         }
     }
 
-    private void getMyLocation(boolean animate){
+    private void getMyLocation(boolean animate, boolean getMoreInfo){
         if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION)
                 == PackageManager.PERMISSION_GRANTED) {
 
@@ -166,7 +172,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                             if(!mMap.isMyLocationEnabled())
                                 mMap.setMyLocationEnabled(true);
 
-                            getAddressInfo(location.getLatitude(), location.getLongitude());
+                            if(getMoreInfo)
+                                getAddressInfo(location.getLatitude(), location.getLongitude());
 
                             if(animate)
                                 mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(location.getLatitude(), location.getLongitude()), ZOOM_2));
@@ -253,7 +260,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             marker.remove();
             marker = null;
             userAddressLabel.setText("Current Location");
-            getMyLocation(true);
+            getMyLocation(true, true);
             return true;
         }
 
