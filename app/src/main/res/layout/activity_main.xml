@@ -100,7 +100,7 @@
                             android:id="@+id/degreeLabelView"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="℃ / ℉"
+                            android:text="℃ | ℉"
                             android:onClick="degreeToggle"
                             android:textSize="24sp"/>
 

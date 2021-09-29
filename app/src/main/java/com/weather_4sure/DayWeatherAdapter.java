@@ -18,7 +18,7 @@ public class DayWeatherAdapter extends RecyclerView.Adapter<DayWeatherViewHolder
 //    private final ArrayList<String> days;
     private ArrayList<ArrayList<JSONObject>>  daysForecastedMap;
     private ArrayList<DayWeatherViewHolder> holders;
-    public boolean isCelsius = true;
+    public static boolean isCelsius = true;
 
     public DayWeatherAdapter(Context context, ArrayList<ArrayList<JSONObject>>  daysForecastedMap){
         this.context = context;

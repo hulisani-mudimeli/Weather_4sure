@@ -51,8 +51,13 @@ public class DayWeatherViewHolder extends RecyclerView.ViewHolder{
             maxTempinKelvin = day.getJSONObject("main").getDouble("temp_max");
 
 
-            loTempView.setText(String.valueOf((int)(minTempinKelvin - KELVIN_CELSIUS)));
-            hiTempView.setText(String.valueOf((int)(maxTempinKelvin - KELVIN_CELSIUS)));
+            if(DayWeatherAdapter.isCelsius) {
+                loTempView.setText(String.valueOf((int) (minTempinKelvin - KELVIN_CELSIUS)));
+                hiTempView.setText(String.valueOf((int) (maxTempinKelvin - KELVIN_CELSIUS)));
+            }else{
+                hiTempView.setText(String.valueOf((int)DayWeatherViewHolder.getFahrenheit(maxTempinKelvin)));
+                loTempView.setText(String.valueOf((int)DayWeatherViewHolder.getFahrenheit(minTempinKelvin)));
+            }
 
 
             // Weather Icon

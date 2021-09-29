@@ -75,6 +75,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     public static final double DEFAULT_LATITUDE = -25.686357;
     public static final double DEFAULT_LONGITUDE = 28.2410923;
 
+    private boolean firstTime = true;
+
 
 
     @Override
@@ -281,10 +283,13 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         //Recycler
         recycler.setLayoutManager(new LinearLayoutManager(this));
         recycler.setAdapter(new DayWeatherAdapter(this, daysForecastedMap));
-        setLabelCelsius(degreeLabelView);
 
-        if(behavior.getState() != BottomSheetBehavior.STATE_EXPANDED)
-            behavior.setState(BottomSheetBehavior.STATE_EXPANDED);
+        if(firstTime) {
+            if (behavior.getState() != BottomSheetBehavior.STATE_EXPANDED)
+                behavior.setState(BottomSheetBehavior.STATE_EXPANDED);
+
+            firstTime = false;
+        }
     }
 
     public void degreeToggle(View view) {
@@ -292,19 +297,19 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         ArrayList<DayWeatherViewHolder> holders = adapter.getHolders();
 
 
-        if(adapter.isCelsius) {
+        if(DayWeatherAdapter.isCelsius) {
             for (DayWeatherViewHolder holder : holders) {
                 holder.hiTempView.setText(String.valueOf((int)DayWeatherViewHolder.getFahrenheit(holder.maxTempinKelvin)));
                 holder.loTempView.setText(String.valueOf((int)DayWeatherViewHolder.getFahrenheit(holder.minTempinKelvin)));
             }
-            adapter.isCelsius = false;
+            DayWeatherAdapter.isCelsius = false;
             setLabelFahrenheit(degreeLabelView);
         }else{
             for (DayWeatherViewHolder holder : holders) {
                 holder.loTempView.setText(String.valueOf((int)(holder.minTempinKelvin - DayWeatherViewHolder.KELVIN_CELSIUS)));
                 holder.hiTempView.setText(String.valueOf((int)(holder.maxTempinKelvin - DayWeatherViewHolder.KELVIN_CELSIUS)));
             }
-            adapter.isCelsius = true;
+            DayWeatherAdapter.isCelsius = true;
             setLabelCelsius(degreeLabelView);
         }
 
@@ -314,19 +319,19 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     private void setLabelCelsius(TextView view){
         Spannable spannable = new SpannableString(view.getText().toString());
-        spannable.setSpan(new StyleSpan(Typeface.BOLD), 0, 1, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+//        spannable.setSpan(new StyleSpan(Typeface.BOLD), 0, 1, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+//        spannable.setSpan(new StyleSpan(Typeface.NORMAL), 1, 5, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
         spannable.setSpan(new ForegroundColorSpan(getResources().getColor(R.color.black)), 0, 1, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-        spannable.setSpan(new StyleSpan(Typeface.NORMAL), 1, 5, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
         spannable.setSpan(new ForegroundColorSpan(getResources().getColor(R.color.grey)), 1, 5, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
         view.setText(spannable);
     }
 
     private void setLabelFahrenheit(TextView view){
         Spannable spannable = new SpannableString(view.getText().toString());
-        spannable.setSpan(new StyleSpan(Typeface.BOLD), 4, 5, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-        spannable.setSpan(new ForegroundColorSpan(getResources().getColor(R.color.black)), 4, 5, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-        spannable.setSpan(new StyleSpan(Typeface.NORMAL), 0, 4, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+//        spannable.setSpan(new StyleSpan(Typeface.NORMAL), 0, 4, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+//        spannable.setSpan(new StyleSpan(Typeface.BOLD), 4, 5, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
         spannable.setSpan(new ForegroundColorSpan(getResources().getColor(R.color.grey)), 0, 4, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+        spannable.setSpan(new ForegroundColorSpan(getResources().getColor(R.color.black)), 4, 5, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
         view.setText(spannable);
     }
 
