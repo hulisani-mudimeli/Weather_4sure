@@ -13,7 +13,6 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
-import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.location.Address;
 import android.location.Geocoder;
@@ -21,7 +20,6 @@ import android.os.Bundle;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.style.ForegroundColorSpan;
-import android.text.style.StyleSpan;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.View;
@@ -42,6 +40,8 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.jakewharton.threetenabp.AndroidThreeTen;
+import com.weather_4sure.RecyclerViewItems.DayWeatherAdapter;
+import com.weather_4sure.RecyclerViewItems.DayWeatherViewHolder;
 
 import org.json.JSONObject;
 
@@ -49,7 +49,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 
 public class MainActivity extends AppCompatActivity implements OnMapReadyCallback, GoogleMap.OnMapClickListener, GoogleMap.OnMyLocationButtonClickListener {
 
@@ -63,6 +62,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private TextView degreeLabelView;
     private Marker marker;
     private RecyclerView recycler;
+
+    private String locality;
 
 
     // Constants
@@ -204,17 +205,28 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
     private void getGeoInfo(double userLat, double userLon){
+        locality = null;
 
         Geocoder geocoder = new Geocoder(this, Locale.getDefault());
         try {
             List<Address> addresses = geocoder.getFromLocation(userLat, userLon, 1);
             if(addresses.size() > 0){
                 StringBuilder display = new StringBuilder();
-                if(addresses.get(0).getSubLocality() != null)
+                if(addresses.get(0).getSubLocality() != null) {
                     display.append(addresses.get(0).getSubLocality()).append(", ");
+                    locality = addresses.get(0).getSubLocality();
+                }
 
-                if(addresses.get(0).getLocality() != null)
+                if(addresses.get(0).getLocality() != null) {
                     display.append(addresses.get(0).getLocality()).append(", ");
+
+                    if(locality.isEmpty()) {
+                        locality = addresses.get(0).getLocality();
+                    }else{
+                        locality += ", " + addresses.get(0).getLocality();
+
+                    }
+                }
 
                 if(addresses.get(0).getAdminArea() != null)
                     display.append(addresses.get(0).getAdminArea()).append(", ");
@@ -279,10 +291,10 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         return false;
     }
 
-    public void reloadRecycler(ArrayList<ArrayList<JSONObject>> daysForecastedMap){
+    public void reloadRecycler(ArrayList<ArrayList<JSONObject>> daysForecastedMap, JSONObject cityData){
         //Recycler
         recycler.setLayoutManager(new LinearLayoutManager(this));
-        recycler.setAdapter(new DayWeatherAdapter(this, daysForecastedMap));
+        recycler.setAdapter(new DayWeatherAdapter(this, daysForecastedMap, cityData, locality));
 
         if(firstTime) {
             if (behavior.getState() != BottomSheetBehavior.STATE_EXPANDED)
@@ -299,15 +311,15 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         if(DayWeatherAdapter.isCelsius) {
             for (DayWeatherViewHolder holder : holders) {
-                holder.hiTempView.setText((int)DayWeatherViewHolder.getFahrenheit(holder.maxTempinKelvin)+ "°");
-                holder.loTempView.setText((int)DayWeatherViewHolder.getFahrenheit(holder.minTempinKelvin)+ "°");
+                holder.hiTempView.setText((int)DayWeatherViewHolder.getFahrenheit(holder.maxTempInKelvin)+ "°");
+                holder.loTempView.setText((int)DayWeatherViewHolder.getFahrenheit(holder.minTempInKelvin)+ "°");
             }
             DayWeatherAdapter.isCelsius = false;
             setLabelFahrenheit(degreeLabelView);
         }else{
             for (DayWeatherViewHolder holder : holders) {
-                holder.loTempView.setText((int)(holder.minTempinKelvin - DayWeatherViewHolder.KELVIN_CELSIUS)+ "°");
-                holder.hiTempView.setText((int)(holder.maxTempinKelvin - DayWeatherViewHolder.KELVIN_CELSIUS)+ "°");
+                holder.hiTempView.setText((int)DayWeatherViewHolder.getCelsius(holder.maxTempInKelvin)+ "°");
+                holder.loTempView.setText((int)DayWeatherViewHolder.getCelsius(holder.minTempInKelvin)+ "°");
             }
             DayWeatherAdapter.isCelsius = true;
             setLabelCelsius(degreeLabelView);
@@ -322,7 +334,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 //        spannable.setSpan(new StyleSpan(Typeface.BOLD), 0, 1, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
 //        spannable.setSpan(new StyleSpan(Typeface.NORMAL), 1, 5, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
         spannable.setSpan(new ForegroundColorSpan(getResources().getColor(R.color.black)), 0, 1, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-        spannable.setSpan(new ForegroundColorSpan(getResources().getColor(R.color.grey)), 1, 5, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+        spannable.setSpan(new ForegroundColorSpan(getResources().getColor(R.color.light_grey)), 1, 5, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
         view.setText(spannable);
     }
 
@@ -330,7 +342,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         Spannable spannable = new SpannableString(view.getText().toString());
 //        spannable.setSpan(new StyleSpan(Typeface.NORMAL), 0, 4, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
 //        spannable.setSpan(new StyleSpan(Typeface.BOLD), 4, 5, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-        spannable.setSpan(new ForegroundColorSpan(getResources().getColor(R.color.grey)), 0, 4, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+        spannable.setSpan(new ForegroundColorSpan(getResources().getColor(R.color.light_grey)), 0, 4, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
         spannable.setSpan(new ForegroundColorSpan(getResources().getColor(R.color.black)), 4, 5, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
         view.setText(spannable);
     }

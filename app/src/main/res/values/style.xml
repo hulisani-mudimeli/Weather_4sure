@@ -6,6 +6,16 @@
         <item name="android:windowLightStatusBar" tools:targetApi="m">true</item>
     </style>
 
+    <style name="AppTheme.ActionBar" parent="Theme.MaterialComponents.Light">
+        <item name="android:statusBarColor">@color/white</item>
+        <item name="actionBarStyle">@style/MyActionBar.White</item>
+        <item name="android:windowLightStatusBar" tools:targetApi="m">true</item>
+    </style>
+
+    <style name="MyActionBar.White" parent="Widget.MaterialComponents.Light.ActionBar.Solid">
+        <item name="background">@color/white</item>
+    </style>
+
     <style name="TextInputStyle1" parent="Widget.MaterialComponents.TextInputLayout.OutlinedBox">
         <item name="boxBackgroundColor">@color/input_field_background_1</item>
         <item name="boxStrokeColor">@color/input_field_background_1</item>

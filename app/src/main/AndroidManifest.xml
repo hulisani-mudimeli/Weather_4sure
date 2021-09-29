@@ -10,8 +10,9 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.Weather_4sure">
-        <activity android:name=".WeatherDetailsActivity"></activity>
+        android:theme="@style/AppTheme.ActionBar">
+        <activity android:name=".WeatherDetailsActivity"/>
+
         <activity
             android:name=".MainActivity"
             android:theme="@style/AppTheme.NoActionBar">

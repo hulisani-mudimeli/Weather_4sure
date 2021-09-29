@@ -77,7 +77,7 @@ public class OpenWeatherAPI {
                 daysForecastedMap.get(forecastIndex).add(listArr.getJSONObject(i));
             }
 
-            ((MainActivity)context).reloadRecycler(daysForecastedMap);
+            ((MainActivity)context).reloadRecycler(daysForecastedMap, jsonResult.getJSONObject("city"));
         } catch (JSONException e) {
             e.printStackTrace();
         }
