@@ -40,8 +40,8 @@ public class DayWeatherAdapter extends RecyclerView.Adapter<DayWeatherViewHolder
     @Override
     public void onBindViewHolder(@NonNull DayWeatherViewHolder holder, int position) {
         //TODO: get appropriate data
-        JSONObject day = daysForecastedMap.get(position).get(0);
-        holder.bindView(day);
+        ArrayList<JSONObject> dayForecast = daysForecastedMap.get(position);
+        holder.bindView(dayForecast, position, daysForecastedMap.size());
     }
 
     @Override

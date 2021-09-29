@@ -68,8 +68,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     // Constants
     public static final int LOCATION_PERMISSION_REQUEST_CODE = 1;
 
-    private static final short DEFAULT_ZOOM = 12;
-    private static final short ZOOM_2 = 9;
+    private static final short DEFAULT_ZOOM = 13;
+    private static final short ZOOM_2 = 10;
     private static final short ZOOM_3 = 6;
 
     public static final double DEFAULT_LATITUDE = -25.686357;
@@ -111,7 +111,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
                 if(newState == BottomSheetBehavior.STATE_EXPANDED | newState == BottomSheetBehavior.STATE_COLLAPSED) {
                     if (marker != null) {
-                        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(marker.getPosition(), ZOOM_2));
+                        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(marker.getPosition(), DEFAULT_ZOOM));
                     } else if (mMap.isMyLocationEnabled()) {
                         getMyLocation(true, false);
                     }
@@ -132,7 +132,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         mMap.setMapStyle(MapStyleOptions.loadRawResourceStyle(this, R.raw.map_style));
         mMap.setOnMapClickListener(this);
         mMap.setOnMyLocationButtonClickListener(this);
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(DEFAULT_LATITUDE, DEFAULT_LONGITUDE), ZOOM_3));
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(DEFAULT_LATITUDE, DEFAULT_LONGITUDE), ZOOM_2));
         checkLocationPermission();
 
         headerLayout.post(() -> {
@@ -188,9 +188,9 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                                 getAddressInfo(location.getLatitude(), location.getLongitude());
 
                             if(animate)
-                                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(location.getLatitude(), location.getLongitude()), ZOOM_2));
+                                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(location.getLatitude(), location.getLongitude()), DEFAULT_ZOOM));
                             else
-                                mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(location.getLatitude(), location.getLongitude()), ZOOM_2));
+                                mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(location.getLatitude(), location.getLongitude()), DEFAULT_ZOOM));
                         }
                     });
         }
@@ -299,15 +299,15 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         if(DayWeatherAdapter.isCelsius) {
             for (DayWeatherViewHolder holder : holders) {
-                holder.hiTempView.setText(String.valueOf((int)DayWeatherViewHolder.getFahrenheit(holder.maxTempinKelvin)));
-                holder.loTempView.setText(String.valueOf((int)DayWeatherViewHolder.getFahrenheit(holder.minTempinKelvin)));
+                holder.hiTempView.setText((int)DayWeatherViewHolder.getFahrenheit(holder.maxTempinKelvin)+ "°");
+                holder.loTempView.setText((int)DayWeatherViewHolder.getFahrenheit(holder.minTempinKelvin)+ "°");
             }
             DayWeatherAdapter.isCelsius = false;
             setLabelFahrenheit(degreeLabelView);
         }else{
             for (DayWeatherViewHolder holder : holders) {
-                holder.loTempView.setText(String.valueOf((int)(holder.minTempinKelvin - DayWeatherViewHolder.KELVIN_CELSIUS)));
-                holder.hiTempView.setText(String.valueOf((int)(holder.maxTempinKelvin - DayWeatherViewHolder.KELVIN_CELSIUS)));
+                holder.loTempView.setText((int)(holder.minTempinKelvin - DayWeatherViewHolder.KELVIN_CELSIUS)+ "°");
+                holder.hiTempView.setText((int)(holder.maxTempinKelvin - DayWeatherViewHolder.KELVIN_CELSIUS)+ "°");
             }
             DayWeatherAdapter.isCelsius = true;
             setLabelCelsius(degreeLabelView);

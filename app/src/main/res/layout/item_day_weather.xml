@@ -2,6 +2,7 @@
 <androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:foreground="?android:attr/selectableItemBackground"
     xmlns:tools="http://schemas.android.com/tools">
 
     <LinearLayout
@@ -15,8 +16,8 @@
             android:layout_height="wrap_content"
             android:layout_weight="5"
             android:paddingStart="@dimen/card_spacing"
-            android:paddingTop="@dimen/item_spacing"
-            android:paddingBottom="@dimen/item_spacing"
+            android:paddingTop="10dp"
+            android:paddingBottom="10dp"
             android:paddingEnd="@dimen/card_spacing"
             android:textColor="@color/black"
             tools:text="Tuesday"/>

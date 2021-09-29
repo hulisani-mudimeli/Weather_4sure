@@ -1,5 +1,6 @@
 package com.weather_4sure;
 
+import android.content.Intent;
 import android.os.Build;
 import android.util.Log;
 import android.view.View;
@@ -18,6 +19,8 @@ import org.threeten.bp.Instant;
 import org.threeten.bp.LocalDate;
 import org.threeten.bp.ZoneId;
 import org.threeten.bp.format.DateTimeFormatter;
+
+import java.util.ArrayList;
 
 public class DayWeatherViewHolder extends RecyclerView.ViewHolder{
     private TextView dayView;
@@ -40,29 +43,29 @@ public class DayWeatherViewHolder extends RecyclerView.ViewHolder{
         loTempView = itemView.findViewById(R.id.loTemp);
     }
 
-    public void bindView(JSONObject day){
+    public void bindView(ArrayList<JSONObject> dayForecast, int dayPosition, int dayCount){
         try {
 //            Log.d(TAG, "bindView: "+day.getLong("dt"));
-            LocalDate ld = Instant.ofEpochMilli(day.getLong("dt")*1000).atZone(ZoneId.systemDefault()).toLocalDate();
+            LocalDate ld = Instant.ofEpochMilli(dayForecast.get(0).getLong("dt")*1000).atZone(ZoneId.systemDefault()).toLocalDate();
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("EEEE");
             dayView.setText(ld.format(formatter));
 
-            minTempinKelvin = day.getJSONObject("main").getDouble("temp_min");
-            maxTempinKelvin = day.getJSONObject("main").getDouble("temp_max");
+            minTempinKelvin = getMinTemp(dayForecast);
+            maxTempinKelvin = getMaxTemp(dayForecast);
 
 
             if(DayWeatherAdapter.isCelsius) {
-                loTempView.setText(String.valueOf((int) (minTempinKelvin - KELVIN_CELSIUS)));
-                hiTempView.setText(String.valueOf((int) (maxTempinKelvin - KELVIN_CELSIUS)));
+                loTempView.setText((int) (minTempinKelvin - KELVIN_CELSIUS) + "°");
+                hiTempView.setText((int) (maxTempinKelvin - KELVIN_CELSIUS) + "°");
             }else{
-                hiTempView.setText(String.valueOf((int)DayWeatherViewHolder.getFahrenheit(maxTempinKelvin)));
-                loTempView.setText(String.valueOf((int)DayWeatherViewHolder.getFahrenheit(minTempinKelvin)));
+                hiTempView.setText((int)DayWeatherViewHolder.getFahrenheit(maxTempinKelvin) + "°");
+                loTempView.setText((int)DayWeatherViewHolder.getFahrenheit(minTempinKelvin) + "°");
             }
 
 
             // Weather Icon
 //            int[] list_10d = new int[]{};
-            int weatherID = day.getJSONArray("weather").getJSONObject(0).getInt("id");
+            int weatherID = getWeatherId(dayForecast, dayPosition, dayCount);
             if(weatherID >= 200 && weatherID <= 232){
                 weatherIcon.setImageDrawable(itemView.getContext().getResources().getDrawable(R.drawable.ic_11d));
             }else if((weatherID >= 300 && weatherID <= 321) ||(weatherID >= 520 && weatherID <= 521)){
@@ -86,9 +89,52 @@ public class DayWeatherViewHolder extends RecyclerView.ViewHolder{
             e.printStackTrace();
             Log.e(TAG, "bindView: " + e.getMessage());
         }
+
+
+        itemView.setOnClickListener(v -> {
+//            Intent intent = new Intent(itemView.getContext(), )
+        });
     }
 
     public static double getFahrenheit(double kelvin){
         return (kelvin - KELVIN_CELSIUS) * 9/5 +32;
+    }
+
+    private double getMinTemp(ArrayList<JSONObject> dayForecast) throws JSONException {
+        double minTemp = Double.MAX_VALUE;
+
+        for (JSONObject timeForecast : dayForecast){
+            double timeTemp = timeForecast.getJSONObject("main").getDouble("temp_min");;
+            if(minTemp > timeTemp){
+                minTemp = timeTemp;
+            }
+        }
+
+        return  minTemp;
+    }
+
+    private double getMaxTemp(ArrayList<JSONObject> dayForecast) throws JSONException {
+        double maxTemp = 0.0;
+
+        for (JSONObject timeForecast : dayForecast){
+            double timeTemp = timeForecast.getJSONObject("main").getDouble("temp_max");;
+            if(maxTemp < timeTemp){
+                maxTemp = timeTemp;
+            }
+        }
+
+        return  maxTemp;
+    }
+
+    private int getWeatherId(ArrayList<JSONObject> dayForecast, int dayPosition, int dayCount) throws JSONException {
+        int preferredTimeIndex = 5;// Index for 15h00
+
+        if (dayPosition == 0) {// If its the first forecasted day
+            return dayForecast.get(0).getJSONArray("weather").getJSONObject(0).getInt("id");
+        }else if(dayForecast.size() < preferredTimeIndex/*dayPosition == dayCount-1*/){// If its last forecasted day
+            return dayForecast.get(dayForecast.size()-1).getJSONArray("weather").getJSONObject(0).getInt("id");
+        }else{// For coming days, return weather icon for 15h00
+            return dayForecast.get(preferredTimeIndex).getJSONArray("weather").getJSONObject(0).getInt("id");
+        }
     }
 }
