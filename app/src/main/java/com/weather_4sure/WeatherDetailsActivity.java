@@ -85,14 +85,14 @@ public class WeatherDetailsActivity extends AppCompatActivity {
             humidityView.setText(idleTimeForecast.getJSONObject("main").getInt("humidity") + "%");
             pressureView.setText(idleTimeForecast.getJSONObject("main").getInt("pressure") + " hPa");
             visibilityView.setText(idleTimeForecast.getInt("visibility")/1000 + " km");
-            weatherDescView.setText(idleTimeForecast.getJSONArray("weather").getJSONObject(0).getString("description"));
+            weatherDescView.setText(capitalizeString(idleTimeForecast.getJSONArray("weather").getJSONObject(0).getString("description")));
             windView.setText(idleTimeForecast.getJSONObject("wind").getDouble("speed") + " m/s");
 
             LocalDateTime dateTimeLTD = Instant.ofEpochMilli(idleTimeForecast.getLong("dt")*1000).atZone(ZoneId.systemDefault()).toLocalDateTime();
             DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("EEE, d MMMM HH:ss");
             dateTimeView.setText(dateTimeLTD.format(dateTimeFormatter));
 
-            addressView.setText(getIntent().getStringExtra("locality"));
+//            addressView.setText(getIntent().getStringExtra("locality"));
 
 
             int weatherId = idleTimeForecast.getJSONArray("weather").getJSONObject(0).getInt("id");
@@ -123,6 +123,8 @@ public class WeatherDetailsActivity extends AppCompatActivity {
             sunriseView.setText(sunriseLdt.format(timeFormatter));
             sunsetView.setText(sunsetLdt.format(timeFormatter));
 
+            addressView.setText(cityData.getString("name"));
+
         } catch (JSONException e) {
             e.printStackTrace();
             Log.d(TAG, "onCreate: "+e.getMessage());
@@ -140,7 +142,7 @@ public class WeatherDetailsActivity extends AppCompatActivity {
     }
 
     private JSONObject getIdleTimeForecast(ArrayList<JSONObject> dayForecast, int dayPosition)  {
-        int preferredTimeIndex = 4;// Index for 15h00
+        int preferredTimeIndex = 5;// Index for 15h00
 
         if (dayPosition == 0) {// If its the first forecasted day
             return dayForecast.get(0);
@@ -149,5 +151,19 @@ public class WeatherDetailsActivity extends AppCompatActivity {
         }else{// For coming days, return weather icon for 15h00
             return dayForecast.get(preferredTimeIndex);
         }
+    }
+
+    public static String capitalizeString(String string) {
+        char[] chars = string.toLowerCase().toCharArray();
+        boolean found = false;
+        for (int i = 0; i < chars.length; i++) {
+            if (!found && Character.isLetter(chars[i])) {
+                chars[i] = Character.toUpperCase(chars[i]);
+                found = true;
+            } else if (Character.isWhitespace(chars[i]) || chars[i]=='.' || chars[i]=='\'') { // You can add other chars here
+                found = false;
+            }
+        }
+        return String.valueOf(chars);
     }
 }

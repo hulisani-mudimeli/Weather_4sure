@@ -155,7 +155,7 @@ public class DayWeatherViewHolder extends RecyclerView.ViewHolder{
             weatherIcon.setImageDrawable(context.getResources().getDrawable(R.drawable.ic_02d));
         }else if(weatherID == 802){
             weatherIcon.setImageDrawable(context.getResources().getDrawable(R.drawable.ic_03d));
-        }else if(weatherID == 803){
+        }else if(weatherID == 803 || weatherID == 804){
             weatherIcon.setImageDrawable(context.getResources().getDrawable(R.drawable.ic_04d));
         }
     }

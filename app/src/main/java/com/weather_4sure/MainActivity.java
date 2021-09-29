@@ -220,7 +220,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 if(addresses.get(0).getLocality() != null) {
                     display.append(addresses.get(0).getLocality()).append(", ");
 
-                    if(locality.isEmpty()) {
+                    if(locality == null) {
                         locality = addresses.get(0).getLocality();
                     }else{
                         locality += ", " + addresses.get(0).getLocality();
@@ -228,11 +228,19 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                     }
                 }
 
-                if(addresses.get(0).getAdminArea() != null)
+                if(addresses.get(0).getAdminArea() != null) {
                     display.append(addresses.get(0).getAdminArea()).append(", ");
+                    if(locality == null) {
+                        locality = addresses.get(0).getAdminArea();
+                    }
+                }
 
-                if(addresses.get(0).getCountryName() != null)
+                if(addresses.get(0).getCountryName() != null) {
                     display.append(addresses.get(0).getCountryName());
+                    if(locality == null) {
+                        locality = addresses.get(0).getCountryName();
+                    }
+                }
 
                 userAddress.setText(display.toString());
 //                Log.d(TAG, "getUserAddress: "+addresses.get(0));
