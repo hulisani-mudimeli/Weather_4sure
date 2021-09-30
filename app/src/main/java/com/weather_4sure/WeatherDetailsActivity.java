@@ -88,7 +88,7 @@ public class WeatherDetailsActivity extends AppCompatActivity {
             weatherDescView.setText(capitalizeString(idleTimeForecast.getJSONArray("weather").getJSONObject(0).getString("description")));
             windView.setText(idleTimeForecast.getJSONObject("wind").getDouble("speed") + " m/s");
 
-            LocalDateTime dateTimeLTD = Instant.ofEpochMilli(idleTimeForecast.getLong("dt")*1000).atZone(ZoneId.systemDefault()).toLocalDateTime();
+            LocalDateTime dateTimeLTD = Instant.ofEpochMilli(idleTimeForecast.getLong("dt")*1000).atZone(ZoneId.of("Z")).toLocalDateTime();
             DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("EEE, d MMMM HH:ss");
             dateTimeView.setText(dateTimeLTD.format(dateTimeFormatter));
 
