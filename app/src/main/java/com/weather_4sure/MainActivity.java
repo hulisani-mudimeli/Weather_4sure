@@ -10,6 +10,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.Manifest;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -23,9 +24,11 @@ import android.text.style.ForegroundColorSpan;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.google.android.gms.common.api.Status;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -38,7 +41,14 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MapStyleOptions;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.libraries.places.api.Places;
+import com.google.android.libraries.places.api.model.Place;
+import com.google.android.libraries.places.api.net.PlacesClient;
+import com.google.android.libraries.places.widget.Autocomplete;
+import com.google.android.libraries.places.widget.AutocompleteActivity;
+import com.google.android.libraries.places.widget.model.AutocompleteActivityMode;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
+import com.google.android.material.textfield.TextInputEditText;
 import com.jakewharton.threetenabp.AndroidThreeTen;
 import com.weather_4sure.RecyclerViewItems.DayWeatherAdapter;
 import com.weather_4sure.RecyclerViewItems.DayWeatherViewHolder;
@@ -47,6 +57,7 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 
@@ -62,15 +73,17 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private TextView degreeLabelView;
     private Marker marker;
     private RecyclerView recycler;
+    private TextInputEditText searchField;
 
     private String locality;
 
 
     // Constants
     public static final int LOCATION_PERMISSION_REQUEST_CODE = 1;
+    private static final int AUTOCOMPLETE_REQUEST_CODE = 2;
 
-    private static final short DEFAULT_ZOOM = 13;
-    private static final short ZOOM_2 = 10;
+    private static final short DEFAULT_ZOOM = 15;
+    private static final short ZOOM_2 = 11;
     private static final short ZOOM_3 = 6;
 
     public static final double DEFAULT_LATITUDE = -25.686357;
@@ -86,6 +99,13 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         setContentView(R.layout.activity_main);
 
         AndroidThreeTen.init(this);
+
+        // Initialize the SDK
+        Places.initialize(getApplicationContext(), getResources().getString(R.string.places_key));
+
+        // Create a new PlacesClient instance
+//        PlacesClient placesClient = Places.createClient(this);
+
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.mapView);
         mapFragment.getMapAsync(this);
@@ -97,6 +117,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         userAddressLabel = findViewById(R.id.userAddressLabel);
         recycler = findViewById(R.id.recycler);
         degreeLabelView = findViewById(R.id.degreeLabelView);
+        searchField = findViewById(R.id.searchField);
         setLabelCelsius(degreeLabelView);
 
 
@@ -124,6 +145,47 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
             }
         });
+
+
+        searchField.setOnClickListener(v -> {
+            List<Place.Field> fields = Arrays.asList(Place.Field.ID, Place.Field.NAME, Place.Field.LAT_LNG);
+
+            // Start the autocomplete intent.
+            Intent intent = new Autocomplete.IntentBuilder(AutocompleteActivityMode.OVERLAY, fields)
+                    .setCountry("ZA")
+                    .build(this);
+            startActivityForResult(intent, AUTOCOMPLETE_REQUEST_CODE);
+        });
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == AUTOCOMPLETE_REQUEST_CODE) {
+            if (resultCode == RESULT_OK) {
+                Place place = Autocomplete.getPlaceFromIntent(data);
+                Log.i(TAG, "Place: " + place.getName() + ", " + place.getId());
+
+                hideKeyboard();
+                onMapClick(place.getLatLng());
+                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(place.getLatLng(), DEFAULT_ZOOM));
+            } else if (resultCode == AutocompleteActivity.RESULT_ERROR) {
+                Status status = Autocomplete.getStatusFromIntent(data);
+                Log.i(TAG, status.getStatusMessage());
+            } else if (resultCode == RESULT_CANCELED) {
+                // The user canceled the operation.
+            }
+            return;
+        }
+        super.onActivityResult(requestCode, resultCode, data);
+    }
+
+    private void hideKeyboard(){
+        // Check if no view has focus:
+        View view = this.getCurrentFocus();
+        if (view != null) {
+            InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+            imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+        }
     }
 
     @Override

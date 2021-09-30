@@ -26,8 +26,9 @@
                 android:drawablePadding="@dimen/card_spacing"
                 android:paddingStart="@dimen/card_spacing"
                 android:paddingEnd="@dimen/card_spacing"
+                android:focusable="false"
                 android:hint="Search address"
-                android:inputType="text"/>
+                android:inputType="none"/>
         </com.google.android.material.textfield.TextInputLayout>
     </RelativeLayout>
 
